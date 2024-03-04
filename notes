@@ -1,0 +1,76 @@
+from selenium import webdriver
+from selenium.webdriver.chrome.options import Options
+from selenium.webdriver.common.by import By
+import time
+import smtplib
+from email.mime.text import MIMEText
+from email.mime.multipart import MIMEMultipart
+
+def envoyer_email(message_texte, destinataire, sujet):
+    expediteur = "matthlacoste@gmail.com"
+    mot_de_passe = "cxcv corx wqci gqlf"
+
+    # Configurer le message
+    message = MIMEMultipart()
+    message['From'] = expediteur
+    message['To'] = destinataire
+    message['Subject'] = sujet
+
+    # Ajouter le corps du message
+    message.attach(MIMEText(message_texte, 'plain'))
+
+    # Établir la connexion avec le serveur SMTP de Gmail
+    serveur_smtp = smtplib.SMTP('smtp.gmail.com', 587)
+    serveur_smtp.starttls()
+    serveur_smtp.login(expediteur, mot_de_passe)
+
+    # Envoyer l'e-mail
+    serveur_smtp.sendmail(expediteur, destinataire, message.as_string())
+
+    # Fermer la connexion
+    serveur_smtp.quit()
+
+
+chrome_options = Options()
+chrome_options.add_experimental_option("detach", True)
+
+driver = webdriver.Chrome(chrome_options)
+driver.get("https://www.leonard-de-vinci.net/")
+
+driver.find_element(By.CLASS_NAME,"input-block-level").send_keys("matthieu.lacoste@edu.devinci.fr")
+driver.find_element(By.ID,"btn_next").click()
+time.sleep(1)
+driver.find_element(By.ID,"passwordInput").send_keys("Matthcab!29")
+driver.find_element(By.ID,"submitButton").click()
+time.sleep(1)
+scolarite_button = driver.find_element(By.XPATH, "//span[@class='site-menu-title site-menu-title-main' and text()='Scolarité']")
+scolarite_button.click()
+note_button = driver.find_element(By.XPATH, "//span[@class='site-menu-title' and text()='Notes']")
+note_button.click()
+
+time.sleep(1)
+note_elements = driver.find_elements(By.CSS_SELECTOR,".publication.badge.badge-info")
+# for i in note_elements :
+#     print (i.text.strip())
+
+taille_anciennes_notes = len(note_elements)
+# print(taille_anciennes_notes)
+nouvelles_notes = note_elements
+j =0
+new_note = driver.find_element(By.CSS_SELECTOR, ".publication.badge.badge-info")
+while len(nouvelles_notes) == len(note_elements)  : 
+    nouvelles_notes = driver.find_elements(By.CSS_SELECTOR,".publication.badge.badge-info")
+    j=j+1
+    print (j)
+    time.sleep(60)
+if len(note_elements)< len(nouvelles_notes):
+    derniere_note= nouvelles_notes[-1].text.strip()
+    # print(derniere_note)
+    message_texte = f"Nouvelle note : {derniere_note}"
+    destinataire = "amazonmatthlacoste@gmail.com"
+    sujet = "Nouvelle note"
+    envoyer_email(message_texte, destinataire, sujet)
+else:
+    print("erreur")
+
+
